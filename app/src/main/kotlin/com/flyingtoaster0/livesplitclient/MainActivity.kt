@@ -3,8 +3,9 @@ package com.flyingtoaster0.livesplitclient
 import android.app.Activity
 import android.os.Bundle
 
-class MainActivity : Activity() {
-    val mClient = LiveSplitClient()
+class MainActivity : Activity(), ClientConnectionListener {
+
+    val mClient = LiveSplitClient(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,5 +25,13 @@ class MainActivity : Activity() {
         disconnectButton.setOnClickListener {
             mClient.close()
         }
+    }
+
+    override fun onConnectionSuccess() {
+        throw UnsupportedOperationException("MainActivity Connection success")
+    }
+
+    override fun onConnectionFailure() {
+        throw UnsupportedOperationException("MainActivity Connection failure")
     }
 }

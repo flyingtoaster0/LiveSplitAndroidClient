@@ -25,10 +25,12 @@ import static org.mockito.Mockito.when;
 public class LiveSplitClientTest {
 
     private LiveSplitClient mClient;
+    private ClientConnectionListener clientConnectionListener;
 
     @Before
     public void setup() throws IOException {
-        mClient = new LiveSplitClient();
+        clientConnectionListener = mock(ClientConnectionListener.class);
+        mClient = new LiveSplitClient(clientConnectionListener);
         mClient.setSocket(mock(Socket.class));
         mClient.setOutputStreamWriter(mock(OutputStreamWriter.class));
     }
@@ -49,5 +51,30 @@ public class LiveSplitClientTest {
     public void shouldCloseSocket() throws IOException {
         mClient.close();
         verify(mClient.getSocket()).close();
+    }
+
+    @Test
+    public void onSocketConnectionSuccess_shouldSetSocketAndStreamWriter() {
+        Socket expectedSocket = mock(Socket.class);
+        OutputStreamWriter expectedStreamWriter = mock(OutputStreamWriter.class);
+
+        mClient.onConnectionSuccess(expectedSocket, expectedStreamWriter);
+
+        Socket actualSocket = mClient.getSocket();
+        OutputStreamWriter actualStreamWriter = mClient.getOutputStreamWriter();
+        assertThat(actualSocket).isEqualTo(expectedSocket);
+        assertThat(actualStreamWriter).isEqualTo(expectedStreamWriter);
+    }
+
+    @Test
+    public void onSocketConnectionSuccess_shouldNotifyListener() {
+        mClient.onConnectionSuccess(mock(Socket.class), mock(OutputStreamWriter.class));
+        verify(clientConnectionListener).onConnectionSuccess();
+    }
+
+    @Test
+    public void onSocketConnectionFailure_shouldNotifyListener() {
+        mClient.onConnectionFailure();
+        verify(clientConnectionListener).onConnectionFailure();
     }
 }

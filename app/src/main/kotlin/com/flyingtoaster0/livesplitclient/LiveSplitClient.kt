@@ -3,7 +3,7 @@ package com.flyingtoaster0.livesplitclient
 import java.io.OutputStreamWriter
 import java.net.Socket
 
-class LiveSplitClient {
+open class LiveSplitClient(val clientConnectionListener: ClientConnectionListener) : SocketConnectionListener {
 
     companion object {
         const val START_TIMER = "starttimer\r\n"
@@ -39,13 +39,9 @@ class LiveSplitClient {
         var isClosed : Boolean? = false;
         isClosed = socket?.isClosed;
         if (isClosed != null && isClosed) {
-            socket = createSocket(hostname, portNumber)
-            outputStreamWriter = OutputStreamWriter(socket?.outputStream, "UTF-8")
+            val connectTask = SocketConnectAsyncTask(this, hostname, portNumber);
+            connectTask.execute()
         }
-    }
-
-    fun createSocket(hostname: String, portNumber: Int) : Socket? {
-        return Socket(hostname, portNumber)
     }
 
     fun send(@ServerCommand command: String) {
@@ -62,5 +58,15 @@ class LiveSplitClient {
 
     fun close() {
         socket?.close()
+    }
+
+    override fun onConnectionSuccess(socket: Socket, outputStreamWriter: OutputStreamWriter) {
+        this.socket = socket;
+        this.outputStreamWriter = outputStreamWriter;
+        clientConnectionListener.onConnectionSuccess()
+    }
+
+    override fun onConnectionFailure() {
+        clientConnectionListener.onConnectionFailure()
     }
 }
