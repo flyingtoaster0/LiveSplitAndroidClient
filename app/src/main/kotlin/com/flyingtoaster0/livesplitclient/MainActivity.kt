@@ -13,7 +13,7 @@ class MainActivity : Activity(), ClientConnectionListener {
 
         var connectButton = findViewById(R.id.connect_button)
         connectButton.setOnClickListener {
-            mClient.connect("localhost", 16834)
+            mClient.connect("192.168.1.172", 16834)
         }
 
         var splitButton = findViewById(R.id.split_button)
@@ -28,7 +28,7 @@ class MainActivity : Activity(), ClientConnectionListener {
     }
 
     override fun onConnectionSuccess() {
-        throw UnsupportedOperationException("MainActivity Connection success")
+//        throw UnsupportedOperationException("MainActivity Connection success")
     }
 
     override fun onConnectionFailure() {

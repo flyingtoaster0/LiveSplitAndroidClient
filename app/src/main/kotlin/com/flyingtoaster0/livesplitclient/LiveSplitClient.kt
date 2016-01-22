@@ -36,28 +36,30 @@ open class LiveSplitClient(val clientConnectionListener: ClientConnectionListene
     protected var outputStreamWriter: OutputStreamWriter? = null;
 
     fun connect(hostname: String, portNumber: Int) {
-        var isClosed : Boolean? = false;
-        isClosed = socket?.isClosed;
-        if (isClosed != null && isClosed) {
+        val socket = this.socket
+        if (socket == null || socket.isClosed()) {
             val connectTask = SocketConnectAsyncTask(this, hostname, portNumber);
             connectTask.execute()
         }
     }
 
     fun send(@ServerCommand command: String) {
-        outputStreamWriter?.write(command, 0, command.length)
-        outputStreamWriter?.flush()
+        val socket = this.socket
+        if (socket != null && socket.isConnected()) {
+            outputStreamWriter?.write(command, 0, command.length)
+            outputStreamWriter?.flush()
+        }
     }
 
     fun send(@ServerCommandWithArg command: String, commandArg: String) {
         val message = command + " " + commandArg
-        outputStreamWriter?.write(message, 0, message.length)
-        outputStreamWriter?.flush()
-
+        send(message);
     }
 
     fun close() {
         socket?.close()
+        outputStreamWriter?.close()
+        outputStreamWriter = null;
     }
 
     override fun onConnectionSuccess(socket: Socket, outputStreamWriter: OutputStreamWriter) {
