@@ -1,37 +1,58 @@
 package com.flyingtoaster0.livesplitclient
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.os.Bundle
+import android.support.design.widget.Snackbar
+import android.view.View
+import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : Activity(), ClientConnectionListener {
+open class MainActivity : Activity(), ClientConnectionListener {
 
-    val mClient = LiveSplitClient(this)
+    var client = LiveSplitClient(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main);
 
-        var connectButton = findViewById(R.id.connect_button)
         connectButton.setOnClickListener {
-            mClient.connect("localhost", 16834)
+//            client.connect("localhost", 16834)
+            onConnectionSuccess()
         }
 
-        var splitButton = findViewById(R.id.split_button)
         splitButton.setOnClickListener {
-            mClient.send(LiveSplitClient.START_OR_SPLIT)
+            client.send(LiveSplitClient.START_OR_SPLIT)
         }
 
-        var disconnectButton = findViewById(R.id.disconnect_button)
         disconnectButton.setOnClickListener {
-            mClient.close()
+            client.close()
         }
     }
 
     override fun onConnectionSuccess() {
-        throw UnsupportedOperationException("MainActivity Connection success")
+        Snackbar.make(splitButton, "Connected", Snackbar.LENGTH_SHORT)
+        animateConnectComponentsDownOut()
     }
 
     override fun onConnectionFailure() {
-        throw UnsupportedOperationException("MainActivity Connection failure")
+        Snackbar.make(contentView, "Connection Failed", Snackbar.LENGTH_SHORT)
+    }
+
+    fun animateConnectComponentsDownOut() {
+        val buttonDownOut = getDownOutAnimation(connectButton, contentView)
+        val editTextDownOut = getDownOutAnimation(hostnameEditText, contentView)
+
+        val downOutAnimatorSet = AnimatorSet()
+        editTextDownOut.startDelay = 100
+        downOutAnimatorSet.playTogether(buttonDownOut, editTextDownOut)
+        downOutAnimatorSet.start()
+    }
+
+    fun animateSplitNameDown() {
+        val animatorDown = ObjectAnimator.ofFloat(subtitleBar, "translationY", -subtitleBar.height.toFloat(), 0f)
+        animatorDown.setDuration(250)
+        subtitleBar.visibility = View.VISIBLE
+        animatorDown.start()
     }
 }

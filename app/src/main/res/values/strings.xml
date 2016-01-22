@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LiveSplitClient</string>
+    <string name="connect">CONNECT</string>
 </resources>
